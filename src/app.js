@@ -12,23 +12,27 @@ const app = express();
 
 
 
-app.get('/user', (req, res) => {
-    res.send({ firstName: "Devi", lastName: "Desai" });
-})
-
-app.post('/user', (req, res) => {
-    console.log("This is a post request");
-    res.send("Data successfully saved in the database!!");
-})
-
-app.delete('/user', (req, res) => {
-    console.log("This is a delete request");
-    res.send("Data successfully deleted from the database!!");
-})
-
-app.use("/user", (req, res) => {
-    res.send("Namaste Devi Desai!!");
-})
+app.get("/user",
+    [(req, res, next) => {
+        console.log("handling route user 1");
+        next();
+    },
+    (req, res, next) => {
+        console.log("handling route user 2");
+        next();
+    },
+    (req, res, next) => {
+        console.log("handling route user 3");
+        next();
+    }],
+    (req, res, next) => {
+        console.log("handling route user 4 ");
+        next();
+    },
+    (req, res, next) => {
+        console.log("handling route user 5 ");
+        res.send("Route 5");
+    });
 // 3000 refers to the port on which the application is running on.
 app.listen(3000, () => {
     console.log("Server is successfully listening on port 3000");
