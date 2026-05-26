@@ -1,38 +1,24 @@
 const express = require('express');
+const { adminAuth, userAuth } = require('./middlewares/auth');
 // Creating a new express js application. This will create a new web server.
 const app = express();
 
-// app.use("/test", (req, res) => {
-//     res.send("Hello World from server");
-// })
+app.use('/admin', adminAuth);
 
-// app.use("/hello", (req, res) => {
-//     res.send("Hello Hello Hello");
-// })
+app.use('/user', userAuth);
 
+app.get('/admin/getAllData', (req, res) => {
+    res.send("All data sent");
+});
 
+app.get('/admin/deleteUser', (req, res) => {
+    res.send("User deleted");
+});
 
-app.get("/user",
-    [(req, res, next) => {
-        console.log("handling route user 1");
-        next();
-    },
-    (req, res, next) => {
-        console.log("handling route user 2");
-        next();
-    },
-    (req, res, next) => {
-        console.log("handling route user 3");
-        next();
-    }],
-    (req, res, next) => {
-        console.log("handling route user 4 ");
-        next();
-    },
-    (req, res, next) => {
-        console.log("handling route user 5 ");
-        res.send("Route 5");
-    });
+app.get('/user/getUserData', (req, res) => {
+    res.send("User data sent");
+});
+
 // 3000 refers to the port on which the application is running on.
 app.listen(3000, () => {
     console.log("Server is successfully listening on port 3000");
