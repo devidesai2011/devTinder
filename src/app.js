@@ -56,7 +56,7 @@ app.delete('/user', (req, res) => {
 app.patch('/user', (req, res) => {
     const email = req.body.email;
     const updateData = req.body;
-    User.findOneAndUpdate({ email: email }, updateData).then((user) => {
+    User.findOneAndUpdate({ email: email }, updateData, { runValidators: true }).then((user) => {
         if (!user) {
             return res.status(404).send('User not found');
         }
