@@ -53,10 +53,18 @@ app.delete('/user', (req, res) => {
 });
 
 // Update data of the user
-app.patch('/user', (req, res) => {
-    const email = req.body.email;
+app.patch('/user/:id', (req, res) => {
+    const id = req.params?.id;
     const updateData = req.body;
-    User.findOneAndUpdate({ email: email }, updateData, { runValidators: true }).then((user) => {
+    const ALLOWED_UPDATES = ['age', 'gender', 'photoUrl', 'about', 'skills'];
+    const isUpdateAllowed = Object.keys(updateData).every((key) => ALLOWED_UPDATES.includes(key));
+    if (!isUpdateAllowed) {
+        return res.status(400).send('Invalid updates');
+    }
+    if (updateData?.skills.length > 10) {
+        return res.status(400).send('Too many skills');
+    }
+    User.findByIdAndUpdate(id, updateData, { runValidators: true }).then((user) => {
         if (!user) {
             return res.status(404).send('User not found');
         }
