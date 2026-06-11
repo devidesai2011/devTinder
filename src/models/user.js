@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
@@ -13,11 +14,21 @@ const userSchema = new Schema({
         type: String,
         required: true,
         trim: true,
-        unique: true
+        unique: true,
+        validate(value) {
+            if (!validator.isEmail(value)) {
+                throw new Error('Invalid email format');
+            }
+        }
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        validate(value) {
+            if (!validator.isStrongPassword(value, { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 })) {
+                throw new Error('Password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and symbols');
+            }
+        }
     },
     age: {
         type: Number,
@@ -33,7 +44,12 @@ const userSchema = new Schema({
     },
     photoUrl: {
         type: String,
-        default: 'https://static.vecteezy.com/system/resources/thumbnails/042/332/098/small_2x/default-avatar-profile-icon-grey-photo-placeholder-female-no-photo-images-for-unfilled-user-profile-greyscale-illustration-for-socail-media-web-vector.jpg'
+        default: 'https://static.vecteezy.com/system/resources/thumbnails/042/332/098/small_2x/default-avatar-profile-icon-grey-photo-placeholder-female-no-photo-images-for-unfilled-user-profile-greyscale-illustration-for-socail-media-web-vector.jpg',
+        validate(value) {
+            if (!validator.isURL(value)) {
+                throw new Error('Invalid URL format');
+            }
+        }
     },
     about: {
         type: String,

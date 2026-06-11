@@ -13,7 +13,7 @@ app.post('/signup', (req, res) => {
     user.save().then(() => {
         res.status(201).send('User created successfully');
     }).catch((err) => {
-        res.status(500).send('Error creating user');
+        res.status(500).send(err.message ? err.message : 'Error creating user');
     });
 });
 
@@ -35,7 +35,7 @@ app.get('/user', (req, res) => {
         }
         res.status(200).json(user);
     }).catch((err) => {
-        res.status(500).send('Error fetching user');
+        res.status(500).send(err.message ? err.message : 'Error fetching user');
     });
 });
 
