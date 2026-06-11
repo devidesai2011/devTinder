@@ -4,17 +4,33 @@ const { adminAuth, userAuth } = require('./middlewares/auth');
 const app = express();
 const connectDb = require('./config/database');
 const User = require('./models/user');
+const { validateSignUpData } = require('./utils/validation');
+const bcrypt = require('bcrypt');
+const validator = require('validator');
 
 app.use(express.json()); // This will allow us to parse JSON data in the request body.
 
-app.post('/signup', (req, res) => {
-    // Creating a new instance  of user model
-    const user = new User(req.body);
-    user.save().then(() => {
-        res.status(201).send('User created successfully');
-    }).catch((err) => {
-        res.status(500).send(err.message ? err.message : 'Error creating user');
-    });
+app.post('/signup', async (req, res) => {
+    // Validation of Data
+    try {
+        validateSignUpData(req);
+
+        // Encrypt the password
+        const passwordHash = await bcrypt.hash(req.body.password, 10);
+
+        // Store user in data base
+        // Creating a new instance  of user model
+        const { firstName, lastName, email } = req.body;
+        const user = new User({ firstName, lastName, email, password: passwordHash });
+        user.save().then(() => {
+            res.status(201).send('User created successfully');
+        }).catch((err) => {
+            res.status(500).send(err.message ? err.message : 'Error creating user');
+        });
+
+    } catch (error) {
+        return res.status(400).send(error.message);
+    }
 });
 
 // Get feed api /feed -> get all the users from the database
@@ -73,6 +89,29 @@ app.patch('/user/:id', (req, res) => {
         res.status(500).send('Error updating user');
     });
 });
+
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!validator.isEmail(email)) {
+            return res.status(400).send('Invalid email format');
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).send('Invalid Credentials');
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (isPasswordValid) {
+            res.status(200).send('Login successful');
+        } else {
+            res.status(401).send('Invalid credentials');
+        }
+    } catch (error) {
+        res.status(500).send(error.message ? error.message : 'Error logging in');
+    }
+})
 
 connectDb().then(() => {
     console.log('Connected to MongoDB');
